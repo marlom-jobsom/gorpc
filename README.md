@@ -5,7 +5,7 @@ This is a final project developed to attent the last requirement of master degre
 
 ## Installation
 ```shell
-# Commands to install the project
+$ go get github.com/marlom-jobsom/gorpc
 ```
 
 ## Implementations
