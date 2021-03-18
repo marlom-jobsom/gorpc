@@ -35,7 +35,7 @@ import (
 
 // Names used to register this struct on remote service
 const (
-    NlgName      = "NLG"
+    Name         = "NLG"
     TextTokenize = "TextTokenize"
 )
 
@@ -71,14 +71,14 @@ Here we have its `Client Proxy`:
 package nlg
 
 import (
-    "time"
+    "github.com/marlom-jobsom/gorpc/internal/network/response"
     "github.com/marlom-jobsom/gorpc/pkg"
 )
 
 // NewClient build new instance of Client
 func NewClient(lookupServerAddress string, encryptKey string) *Client {
     return &Client{
-        proxy:              pkg.NewClientProxy(lookupServerAddress, encryptKey, NlgName),
+        proxy:              pkg.NewClientProxy(lookupServerAddress, encryptKey, Name),
         methodTextTokenize: TextTokenize,
     }
 }
@@ -90,22 +90,22 @@ type Client struct {
 }
 
 // TextTokenize tokenizes a text
-func (n *Client) TextTokenize(text string) []interface{} {
+func (n *Client) TextTokenize(text string) response.Response {
     // The implementation could treat the return to match with the original method.
     // For purpose of simplification, it's just returning it
     return n.proxy.Invoke(n.methodTextTokenize, text)
 }
 ```
 
-Finally the main for the client:
+Finally, the main for the client:
 ```go
-// file: ./cmd/client/main.go
+// file: ./cmd/client/client.go
 package main
 
 import (
-    "log"
-    "nlg"
+    "github.com/marlom-jobsom/gorpc/nlg"
     "github.com/marlom-jobsom/gorpc/pkg"
+    "log"
 )
 
 func main() {
@@ -113,28 +113,26 @@ func main() {
     nlgClient := nlg.NewClient(lookupServerAddress, encryptKey)
     log.Println(nlgClient.TextTokenize("Silence is is golden"))
 }
-
 ```
 
 ### Remote Service
 The main for `Remote Service`:
 
 ```go
-// file: ./cmd/remote_service/main.go
+// file: ./cmd/remote_service/client.go
 package main
 
 import (
-    "nlg"
+    "github.com/marlom-jobsom/gorpc/nlg"
     "github.com/marlom-jobsom/gorpc/pkg"
 )
 
 func main() {
     port, registrationServerAddress, encryptKey := pkg.GetRemoteServiceArgs()
     remoteServiceServer := pkg.NewRemoteServiceServer(port, registrationServerAddress, encryptKey)
-    remoteServiceServer.RegisterServiceInNamingService(nlg.NlgName, nlg.NewNLG())
+    remoteServiceServer.RegisterServiceInNamingService(nlg.Name, nlg.NewNLG())
     remoteServiceServer.Run()
 }
-
 ```
 
 ### Naming Service
